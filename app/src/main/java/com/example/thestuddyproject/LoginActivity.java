@@ -3,12 +3,19 @@ package com.example.thestuddyproject;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
@@ -17,12 +24,70 @@ public class LoginActivity extends AppCompatActivity {
     private FirebaseAuth.AuthStateListener mAuthListener;
     private EditText email, password;
     private ProgressBar progressBar;
+    private Button signinButton;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-    }
 
+        email = findViewById(R.id.email);
+        password =  findViewById(R.id.password);
+        progressBar = findViewById(R.id.progressBar);
+        signinButton = findViewById(R.id.email_sign_in_button);
+        setupFireBaseAuth();
+
+        signinButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(!isEmpty((email.getText().toString())) && !isEmpty(password.getText().toString())) {
+                    showDialog();
+
+                    FirebaseAuth.getInstance().signInWithEmailAndPassword(email.getText().toString(), password.getText().toString()).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                        @Override
+                        public void onComplete(@NonNull Task<AuthResult> task) {
+                            // loading intent in the auth method
+
+                            hideDialog();
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Toast.makeText(LoginActivity.this, "You failleedd", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                } else {
+                    Toast.makeText(LoginActivity.this, "you did not fill out all fields", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+
+        // on click listeners for links -----------------------------------------------------------------------
+        TextView register = findViewById(R.id.link_register);
+        register.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
+                startActivity(intent);
+            }
+        });
+        TextView forgotPass =  findViewById(R.id.forgot_password);
+        forgotPass.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //add code for resetting password
+            }
+        });
+        TextView resendVerification = findViewById(R.id.resend_verification_email);
+        resendVerification.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
+
+    }
 
 
     // ---------------------------------------------------------------------------------------------------- //
@@ -44,6 +109,7 @@ public class LoginActivity extends AppCompatActivity {
             progressBar.setVisibility(View.INVISIBLE);
         }
     }
+
     // -------------------- FireBase Setup ---------------------- //
 
     private void setupFireBaseAuth() {
@@ -53,8 +119,16 @@ public class LoginActivity extends AppCompatActivity {
                 FirebaseUser user = firebaseAuth.getCurrentUser();
 
                 if (user != null ) {
-                    Toast.makeText(LoginActivity.this, "Logged in!", Toast.LENGTH_SHORT).show();
-                } else {
+                    //check to make sure user has verified email
+                    if (user.isEmailVerified()) {
+                        Toast.makeText(LoginActivity.this, "Logged in!", Toast.LENGTH_SHORT).show();
+                        //load intent
+                    } else {
+                        Toast.makeText(LoginActivity.this, "Check your email for Verification Link", Toast.LENGTH_SHORT).show();
+                        FirebaseAuth.getInstance().signOut();
+                    }
+                }
+                else {
                     Toast.makeText( LoginActivity.this, "Signed Out", Toast.LENGTH_SHORT).show();
                 }
             }

@@ -5,6 +5,7 @@ import static android.content.ContentValues.TAG;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -14,6 +15,7 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
@@ -69,6 +71,25 @@ public class RegisterActivity extends AppCompatActivity {
 
         }
 
+        private void sendVerificationEmail() {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+        if (user != null) {
+        user.sendEmailVerification().addOnCompleteListener(new OnCompleteListener<Void>() {
+
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                Toast.makeText(RegisterActivity.this, "Link Sent!", Toast.LENGTH_SHORT).show();
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Toast.makeText(RegisterActivity.this, "Email has not been sent", Toast.LENGTH_SHORT).show();
+            }
+        });
+        }
+        }
+
     private void registerNewEmail(String email, String password) {
         showDialog();
 
@@ -78,8 +99,12 @@ public class RegisterActivity extends AppCompatActivity {
 
                 if (task.isSuccessful()) {
                     FirebaseAuth.getInstance().signOut();
+                    sendVerificationEmail();
+                    Toast.makeText(RegisterActivity.this, "Registration Successful", Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
+                    startActivity(intent);
                 } else  {
-                    Toast.makeText(RegisterActivity.this, "unable to register", Toast.LENGTH_SHORT);
+                    Toast.makeText(RegisterActivity.this, "unable to register", Toast.LENGTH_SHORT).show();
                 }
                 hideDialog();
             }
