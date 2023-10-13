@@ -88,16 +88,6 @@
                     android:textColor="#38A1F4"
                     android:textSize="16sp" />
 
-                <TextView
-                    android:id="@+id/resend_verification_email"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/forgot_password"
-                    android:layout_centerHorizontal="true"
-                    android:layout_marginTop="20dp"
-                    android:text="Resend Verification Email"
-                    android:textColor="#38A1F4"
-                    android:textSize="16sp" />
 
             </RelativeLayout>
 

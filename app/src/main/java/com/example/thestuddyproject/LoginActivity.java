@@ -47,8 +47,9 @@ public class LoginActivity extends AppCompatActivity {
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             // loading intent in the auth method
-
+                            Intent intent = new Intent(LoginActivity.this, MainPage.class);
                             hideDialog();
+                            startActivity(intent);
                         }
                     }).addOnFailureListener(new OnFailureListener() {
                         @Override
@@ -77,13 +78,6 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 //add code for resetting password
-            }
-        });
-        TextView resendVerification = findViewById(R.id.resend_verification_email);
-        resendVerification.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
             }
         });
 
