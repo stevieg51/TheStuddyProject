@@ -14,12 +14,15 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.example.thestuddyproject.datamodels.User;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 public class RegisterActivity extends AppCompatActivity {
 
@@ -100,9 +103,40 @@ public class RegisterActivity extends AppCompatActivity {
                 if (task.isSuccessful()) {
                     sendVerificationEmail();
                     Toast.makeText(RegisterActivity.this, "Registration Successful", Toast.LENGTH_SHORT).show();
-                    FirebaseAuth.getInstance().signOut();
-                    Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
-                    startActivity(intent);
+                    //from the user model class
+                    User user =  new User();
+                    user.setName(email.substring(0, email.indexOf("@")));
+                    user.setPhone("1");
+                    user.setProfile_image("");
+                    user.setUser_id(FirebaseAuth.getInstance().getCurrentUser().getUid());
+
+                    //creating firebase db instance and getting a reference ot it
+                    FirebaseDatabase database = FirebaseDatabase.getInstance();
+                    DatabaseReference myRef = database.getReference();
+
+                    //getting the users node from DB, then adding a child to it of the userID
+                    //then setting the values of the child userID to be that of the newly created user object
+                    myRef.child(getString(R.string.dbnode_users)).
+                            child(FirebaseAuth.getInstance().getCurrentUser().getUid()).
+                            setValue(user).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    if (task.isSuccessful()) {
+                                        FirebaseAuth.getInstance().signOut();
+                                        Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
+                                        startActivity(intent);
+
+                                        Log.d(TAG, "onComplete: User succesfully saved to DB");
+                                    }
+                                }
+                            }).addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    Log.d(TAG, "onComplete: User not saved to DB");
+
+                                }
+                            });
+
                 } else  {
                     Toast.makeText(RegisterActivity.this, "unable to register", Toast.LENGTH_SHORT).show();
                 }

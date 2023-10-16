@@ -45,13 +45,13 @@ public class MainPage extends AppCompatActivity
         } else if (theItem == R.id.nav_cal) {
             getSupportFragmentManager()
                     .beginTransaction()
-                    .replace(R.id.fragment_container, toDoFragment)
+                    .replace(R.id.fragment_container, calendarFragment)
                     .commit();
             return true;
         } else if (theItem ==  R.id.toDo) {
             getSupportFragmentManager()
                     .beginTransaction()
-                    .replace(R.id.fragment_container, calendarFragment)
+                    .replace(R.id.fragment_container, toDoFragment)
                     .commit();
             return true;
         }
